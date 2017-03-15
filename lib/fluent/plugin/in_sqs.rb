@@ -1,6 +1,6 @@
 module Fluent
 
-  require 'aws-sdk-v1'
+  require 'aws-sdk'
 
   class SQSInput < Input
     Plugin.register_input('sqs', self)
@@ -23,6 +23,7 @@ module Fluent
     config_param :wait_time_seconds, :integer, :default => 10
     config_param :instance_profile_credentials, :bool, :default => false
 
+
     def configure(conf)
       super
 
@@ -31,10 +32,7 @@ module Fluent
     def start
       super
 
-      AWS.config(
-        :access_key_id => @aws_key_id,
-        :secret_access_key => @aws_sec_key
-        )
+      AWS.config(setup_credentials)
 
       @queue = AWS::SQS.new(:sqs_endpoint => @sqs_endpoint).queues[@sqs_url]
 
@@ -72,6 +70,22 @@ module Fluent
           $log.warn_backtrace $!.backtrace
         end
       end
+    end
+
+    def setup_credentials
+      options = {}
+      credentials_options = {}
+
+      if @aws_key_id && @aws_sec_key
+        options[:access_key_id] = @aws_key_id
+        options[:secret_access_key] = @aws_sec_key
+      elsif @instance_profile_credentials
+        options[:credentials] = Aws::InstanceProfileCredentials.new()
+      else
+        # Use default credentials
+        # See http://docs.aws.amazon.com/sdkforruby/api/Aws/S3/Client.html
+      end
+      return options
     end
   end
 end

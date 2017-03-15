@@ -32,9 +32,7 @@ module Fluent
         def start
             super
 
-            AWS.config(
-                :access_key_id => @aws_key_id,
-                :secret_access_key => @aws_sec_key)
+            AWS.config(setup_credentials)
 
             @sqs_endpoint = @sqs_url.gsub(/https:\/\/(.*?)\/.*/, '\1') if @sqs_url and not @sqs_endpoint
 
@@ -50,6 +48,22 @@ module Fluent
                   @queue = @sqs.queues.named(@queue_name)
                 end
             end
+        end
+
+        def setup_credentials
+          options = {}
+          credentials_options = {}
+
+          if @aws_key_id && @aws_sec_key
+            options[:access_key_id] = @aws_key_id
+            options[:secret_access_key] = @aws_sec_key
+          elsif @instance_profile_credentials
+            options[:credentials] = Aws::InstanceProfileCredentials.new()
+          else
+            # Use default credentials
+            # See http://docs.aws.amazon.com/sdkforruby/api/Aws/S3/Client.html
+          end
+          return options
         end
 
         def shutdown
