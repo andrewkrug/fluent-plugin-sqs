@@ -21,6 +21,7 @@ module Fluent
     config_param :receive_interval, :time, :default => 0.1
     config_param :max_number_of_messages, :integer, :default => 10
     config_param :wait_time_seconds, :integer, :default => 10
+    config_param :instance_profile_credentials, :bool, :default => false
 
     def configure(conf)
       super

@@ -23,6 +23,7 @@ module Fluent
         config_param :delay_seconds, :integer, :default => 0
         config_param :include_tag, :bool, :default => true
         config_param :tag_property_name, :string, :default => '__tag'
+        config_param :instance_profile_credentials, :bool, :default => false
 
         def configure(conf)
             super
